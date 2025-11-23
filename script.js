@@ -10,6 +10,9 @@ let goalY = (mazeSize - 1) * cellSize + (cellSize / 2);
 const canvasSize = 400; 
 let proceduresMap = {}; // Stores user-defined function bodies
 
+// 🔥 NEW: Level Management Variables
+let currentLevelIndex = 0;
+let currentLevel;
 // --- Blockly Initialization ---
 const workspace = Blockly.inject('blocklyDiv', {
     toolbox: document.getElementById('toolbox'),
@@ -144,8 +147,8 @@ Blockly.JavaScript['repeat_until'] = function(block) {
 function setup() {
   const canvas = createCanvas(canvasSize, canvasSize);
   canvas.parent('game-container');
-  resetCharacter();
-  noLoop();
+  loadLevel(currentLevelIndex); // 🔥 NEW: Load the very first level
+  noLoop(); 
 }
 
 function draw() {
@@ -259,11 +262,15 @@ function checkGoal() {
 
 // --- Execution & Control Functions ---
 
-function resetCharacter() {
-    characterX = cellSize / 2;
-    characterY = cellSize / 2;
-    characterDirection = 0;
-    commands = []; 
+function resetCharacter(doNotClearCommands = false) {
+    // Use the level's defined start position
+    characterX = currentLevel.startPosition[0];
+    characterY = currentLevel.startPosition[1];
+    characterDirection = currentLevel.initialDirection;
+
+    if (!doNotClearCommands) {
+        commands = []; // Clear any pending commands
+    }
     noLoop(); 
     redraw(); 
 }
@@ -541,8 +548,12 @@ function turnCharacter(direction) {
 
 function checkGoal() {
     if (characterX === goalX && characterY === goalY) {
-        alert("🎉 Congratulations! Goal Reached!");
-        noLoop(); 
+        alert(`🎉 Level ${currentLevelIndex + 1} Complete! Moving to the next challenge.`);
+        
+        currentLevelIndex++; // Advance to the next level
+        loadLevel(currentLevelIndex); // Load the next level's setup
+        
+        noLoop(); // Pause while the alert is displayed
     }
 }
 
@@ -574,4 +585,28 @@ function resetAndRunCode() {
         alert("Error executing blocks! Check the console.");
         console.error(e);
     }
+}
+
+// --- Level Loading Function ---
+
+function loadLevel(index) {
+    if (index >= levels.length) {
+        alert("🏆 You completed all levels! Great work!");
+        currentLevelIndex = 0; // Reset for replay
+    }
+    
+    currentLevel = levels[currentLevelIndex];
+    
+    // Update goal and start positions from the level data
+    goalX = currentLevel.goalPosition[0];
+    goalY = currentLevel.goalPosition[1];
+    
+    // Display instructions
+    document.querySelector('header h1').textContent = currentLevel.name + " | " + currentLevel.instruction;
+
+    // Reset character based on level start position
+    resetCharacter(true); 
+
+    // Optional: Only show required blocks for this level (Advanced)
+    // You would modify the toolbox XML here based on currentLevel.requiredBlocks
 }
