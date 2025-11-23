@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>My Coding Adventure - Block Learning</title>
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://unpkg.com/blockly/blockly.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.3/p5.min.js"></script>
+</head>
+<body>
+
+    <header>
+        <h1>Code & Play!</h1>
+    </header>
+
+    <div id="main-container">
+        <div id="game-container">
+            </div>
+
+        <div id="blocklyDiv"></div>
+    </div>
+    
+    <div class="controls">
+        <button onclick="resetAndRunCode()">
+            ▶ Run Program
+        </button>
+        <button onclick="resetCharacter()">
+            ↩ Reset Character
+        </button>
+    </div>
+
+    <xml id="toolbox" style="display: none">
+        <category name="Movement" colour="#4C78A5">
+            <block type="move_forward"></block>
+            <block type="turn_left"></block>
+            <block type="turn_right"></block>
+        </category>
+        <category name="Loops" colour="#5B80A5">
+            <block type="controls_repeat_ext">
+                <value name="TIMES">
+                    <shadow type="math_number">
+                        <field name="NUM">5</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="repeat_until"></block>
+        </category>
+        <category name="Logic" colour="#1EB050">
+            <block type="if_front_is_clear"></block>
+        </category>
+        <category name="My Blocks" colour="#995ba5" custom="PROCEDURE"></category>
+    </xml>
+
+    <script src="script.js"></script>
+</body>
+</html>
