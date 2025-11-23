@@ -1,0 +1,69 @@
+/* General Layout */
+html, body {
+    height: 100%;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    overflow: hidden; /* Prevent scrolling of the whole page */
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    padding: 10px;
+    background-color: #00A9FF;
+    color: white;
+    text-align: center;
+    font-size: 1.5em;
+    flex-shrink: 0;
+}
+
+/* Main Content Area (Workspace + Game) */
+#main-container {
+    display: flex;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+/* Blockly Area */
+#blocklyDiv {
+    width: 65%; /* 2/3 of the space for coding */
+    height: 100%;
+    border-right: 3px solid #ccc;
+}
+
+/* Game Area */
+#game-container {
+    width: 35%; /* 1/3 of the space for the game */
+    height: 100%;
+    display: flex;
+    justify-content: center; /* Center the p5 canvas */
+    align-items: center;
+    background-color: #f0f8ff;
+}
+/* Ensure the p5 canvas respects the container size */
+#game-container canvas {
+    border: 1px solid #00A9FF;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Controls (Run Button) */
+.controls {
+    padding: 10px;
+    background-color: #eee;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.controls button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 0 5px;
+}
+.controls button:hover {
+    background-color: #45a049;
+}
