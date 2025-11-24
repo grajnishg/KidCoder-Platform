@@ -12,6 +12,10 @@
 
     <header>
         <h1>Code & Play!</h1>
+        <div id="level-info">
+            <h2 id="level-name"></h2>
+            <p id="level-instruction"></p>
+        </div>
     </header>
 
     <div id="main-container">
@@ -22,11 +26,17 @@
     </div>
     
     <div class="controls">
+        <button onclick="previousLevel()">
+            &lt; Previous Level
+        </button>
         <button onclick="resetAndRunCode()">
             ▶ Run Program
         </button>
         <button onclick="resetCharacter()">
             ↩ Reset Character
+        </button>
+        <button onclick="nextLevel()">
+            Next Level &gt;
         </button>
     </div>
 
