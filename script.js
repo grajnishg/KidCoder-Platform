@@ -174,9 +174,9 @@ function loadLevel(levelIndex) {
 function setup() {
   const canvas = createCanvas(canvasSize, canvasSize);
   canvas.parent('game-container');
-  preload();
-  loadLevel(currentLevelIndex); // 🔥 NEW: Load the very first level
-  noLoop(); 
+  loadLevel(currentLevelIndex); // Load the first level.
+  noLoop(); // Stop the draw loop.
+  redraw(); // Draw a single frame to show the initial state.
 }
 
 function draw() {
