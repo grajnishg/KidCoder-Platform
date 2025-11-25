@@ -1,253 +1,225 @@
-document.addEventListener('DOMContentLoaded', () => {
+// --- 1. DEFINE BLOCKS AND GENERATORS (IMMEDIATELY) ---
 
-    // --- Custom Block Definitions ---
-    Blockly.Blocks['move_forward'] = {
-      init: function() {
-        this.appendDummyInput().appendField("Move Forward");
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(290);
-        this.setTooltip("Moves the character one step forward.");
-      }
-    };
+// Define the look of the blocks
+Blockly.Blocks['move_forward'] = {
+  init: function() {
+    this.appendDummyInput().appendField("Move Forward");
+    this.setPreviousStatement(true, null); this.setNextStatement(true, null);
+    this.setColour(290); this.setTooltip("Moves the character one step forward.");
+  }
+};
+Blockly.Blocks['turn_left'] = {
+  init: function() {
+    this.appendDummyInput().appendField("Turn Left");
+    this.setPreviousStatement(true, null); this.setNextStatement(true, null);
+    this.setColour(290); this.setTooltip("Turns the character 90 degrees left.");
+  }
+};
+Blockly.Blocks['turn_right'] = {
+  init: function() {
+    this.appendDummyInput().appendField("Turn Right");
+    this.setPreviousStatement(true, null); this.setNextStatement(true, null);
+    this.setColour(290); this.setTooltip("Turns the character 90 degrees right.");
+  }
+};
+Blockly.Blocks['if_front_is_clear'] = {
+  init: function() {
+    this.appendStatementInput("DO").setCheck(null).appendField("If path in front is clear, then");
+    this.setPreviousStatement(true, null); this.setNextStatement(true, null);
+    this.setColour(120); this.setTooltip("Checks if the character can move forward.");
+  }
+};
+Blockly.Block s['repeat_until'] = {
+  init: function() {
+    this.appendStatementInput("DO").setCheck(null).appendField("Repeat until goal is reached");
+    this.setPreviousStatement(true, null); this.setNextStatement(true, null);
+    this.setColour(230); this.setTooltip("Repeats the blocks inside until the goal is reached.");
+  }
+};
 
-    Blockly.Blocks['turn_left'] = {
-      init: function() {
-        this.appendDummyInput().appendField("Turn Left");
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(290);
-        this.setTooltip("Turns the character 90 degrees left.");
-      }
-    };
+// Define what the blocks do (code generation)
+Blockly.JavaScript['move_forward'] = block => 'App.commands.push("move");\n';
+Blockly.JavaScript['turn_left'] = block => 'App.commands.push("turn_left");\n';
+Blockly.JavaScript['turn_right'] = block => 'App.commands.push("turn_right");\n';
 
-    Blockly.Blocks['turn_right'] = {
-      init: function() {
-        this.appendDummyInput().appendField("Turn Right");
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(290);
-        this.setTooltip("Turns the character 90 degrees right.");
-      }
-    };
+Blockly.JavaScript['controls_repeat_ext'] = function(block) {
+  const repetitions = Blockly.JavaScript.valueToCode(block, 'TIMES', Blockly.JavaScript.ORDER_ASSIGNMENT) || '0';
+  let branch = Blockly.JavaScript.statementToCode(block, 'DO');
+  branch = Blockly.JavaScript.addLoopTrap(branch, block);
+  const loopVar = Blockly.JavaScript.nameDB_.getReserveName('count', Blockly.Names.NameType.VARIABLE);
+  return `for (let ${loopVar} = 0; ${loopVar} < ${repetitions}; ${loopVar}++) {\n${branch}}\n`;
+};
+Blockly.JavaScript['if_front_is_clear'] = function(block) {
+  const branch = Blockly.JavaScript.statementToCode(block, 'DO');
+  return `if (App.isPathClear()) { ${branch} };\n`;
+};
+Blockly.JavaScript['repeat_until'] = function(block) {
+  const branch = Blockly.JavaScript.statementToCode(block, 'DO');
+  return `while (!App.isAtGoal()) { ${branch} };\n`;
+};
 
-    Blockly.Blocks['if_front_is_clear'] = {
-      init: function() {
-        this.appendStatementInput("DO")
-            .setCheck(null)
-            .appendField("If path in front is clear, then");
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(120);
-        this.setTooltip("Checks if the character can move forward without hitting a wall.");
-      }
-    };
 
-    Blockly.Blocks['repeat_until'] = {
-      init: function() {
-        this.appendStatementInput("DO")
-            .setCheck(null)
-            .appendField("Repeat until goal is reached, then");
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(230);
-        this.setTooltip("Repeats the blocks inside until the character reaches the goal.");
-      }
-    };
+// --- 2. CREATE APPLICATION OBJECT & DEFINE FUNCTIONS ---
 
-    // --- Blockly Code Generators ---
-    Blockly.JavaScript['move_forward'] = block => 'commands.push("move");\n';
-    console.log('[DEBUG] Immediately after definition, Blockly.JavaScript.move_forward is:', Blockly.JavaScript['move_forward']?.toString());
-    Blockly.JavaScript['turn_left'] = block => 'commands.push("turn_left");\n';
-    Blockly.JavaScript['turn_right'] = block => 'commands.push("turn_right");\n';
+const App = {
+  // --- Properties ---
+  characterX: 0, characterY: 0, characterDirection: 0, goalX: 0, goalY: 0,
+  commands: [],
+  cellSize: 50,
+  canvasSize: 400,
+  currentLevelIndex: 0,
+  characterImg: null,
+  workspace: null,
+  p5: null,
 
-    Blockly.JavaScript['controls_repeat_ext'] = function(block) {
-      const repetitions = Blockly.JavaScript.valueToCode(block, 'TIMES', Blockly.JavaScript.ORDER_ASSIGNMENT) || '0';
-      let branch = Blockly.JavaScript.statementToCode(block, 'DO');
-      branch = Blockly.JavaScript.addLoopTrap(branch, block);
-      const loopVar = Blockly.JavaScript.nameDB_.getReserveName('count', Blockly.Names.NameType.VARIABLE);
-      return `for (let ${loopVar} = 0; ${loopVar} < ${repetitions}; ${loopVar}++) {\n${branch}}
-`;
-    };
+  // --- Game Logic Methods ---
+  isPathClear: function() {
+    let nextX = this.characterX, nextY = this.characterY;
+    if (this.characterDirection === 0) nextX += this.cellSize;
+    else if (this.characterDirection === 1) nextY += this.cellSize;
+    else if (this.characterDirection === 2) nextX -= this.cellSize;
+    else if (this.characterDirection === 3) nextY -= this.cellSize;
+    const minBound = this.cellSize / 2;
+    const maxBound = this.canvasSize - (this.cellSize / 2);
+    return (nextX >= minBound && nextX <= maxBound && nextY >= minBound && nextY <= maxBound);
+  },
+  
+  isAtGoal: function() {
+      return this.characterX === this.goalX && this.characterY === this.goalY;
+  },
 
-    Blockly.JavaScript['if_front_is_clear'] = function(block) {
-        const branch = Blockly.JavaScript.statementToCode(block, 'DO');
-        return `commands.push({ type: 'if', code: () => { ${branch} } });\n`;
-    };
-    
-    Blockly.JavaScript['repeat_until'] = function(block) {
-        const branch = Blockly.JavaScript.statementToCode(block, 'DO');
-        return `commands.push({ type: 'while', code: () => { ${branch} } });\n`;
-    };
-
-    // --- Global Game & State Variables ---
-    let characterX, characterY, characterDirection, goalX, goalY;
-    let commands = [];
-    const cellSize = 50;
-    const canvasSize = 400;
-    let currentLevelIndex = 0;
-    let currentLevel;
-    let characterImg;
-
-    // --- Blockly Workspace Initialization ---
-    const workspace = Blockly.inject('blocklyDiv', {
-        toolbox: document.getElementById('toolbox'),
-        scrollbars: true,
-        trashcan: true,
-        zoom: { controls: true, wheel: true, startScale: 1.0 },
-        grid: { spacing: 25, length: 3, colour: '#ccc', snap: true }
-    });
-
-    // --- Core Game Logic ---
-    const isPathClear = () => {
-        let nextX = characterX, nextY = characterY;
-        if (characterDirection === 0) nextX += cellSize;
-        else if (characterDirection === 1) nextY += cellSize;
-        else if (characterDirection === 2) nextX -= cellSize;
-        else if (characterDirection === 3) nextY -= cellSize;
-        const minBound = cellSize / 2;
-        const maxBound = canvasSize - (cellSize / 2);
-        return (nextX >= minBound && nextX <= maxBound && nextY >= minBound && nextY <= maxBound);
-    };
-
+  // --- Initialization Method ---
+  init: function() {
     // --- p5.js Sketch Definition ---
     const sketch = (p) => {
-        p.preload = () => {
-            characterImg = p.loadImage('assets/character.png');
-        };
+      App.p5 = p; // Save p5 instance for later
+      p.preload = () => {
+        this.characterImg = p.loadImage('assets/character.png');
+      };
 
-        p.setup = () => {
-            const canvas = p.createCanvas(canvasSize, canvasSize);
-            canvas.parent('game-container');
-            loadLevel(currentLevelIndex);
-            p.noLoop();
-        };
+      p.setup = () => {
+        const canvas = p.createCanvas(this.canvasSize, this.canvasSize);
+        canvas.parent('game-container');
+        this.loadLevel(this.currentLevelIndex);
+        p.noLoop();
+      };
 
-        p.draw = () => {
-            p.background(220); 
-            drawGrid();
-            drawGoal();
-            drawCharacter();
-
-            if (commands.length > 0) {
-                const command = commands.shift();
-                if (typeof command === 'string') {
-                    switch (command) {
-                        case 'move': moveCharacter(); break;
-                        case 'turn_left': turnCharacter(-1); break;
-                        case 'turn_right': turnCharacter(1); break;
-                    }
-                } else if (command.type === 'if' && isPathClear()) {
-                    command.code();
-                } else if (command.type === 'while' && (characterX !== goalX || characterY !== goalY)) {
-                    command.code();
-                    commands.unshift(command); // Re-insert loop
-                }
-                checkGoal();
-            }
-            if (commands.length === 0) p.noLoop();
-        };
-
-        const drawGrid = () => {
-            p.stroke(200);
-            for (let x = 0; x <= canvasSize; x += cellSize) p.line(x, 0, x, canvasSize);
-            for (let y = 0; y <= canvasSize; y += cellSize) p.line(0, y, canvasSize, y);
-        };
-
-        const drawGoal = () => {
-            p.fill(255, 165, 0); 
-            p.rect(goalX - cellSize / 2, goalY - cellSize / 2, cellSize, cellSize);
-            p.fill(255);
-            p.textSize(16);
-            p.textAlign(p.CENTER, p.CENTER);
-            p.text("GOAL", goalX, goalY);
-        };
-
-        const drawCharacter = () => {
-            p.push();
-            p.translate(characterX, characterY);
-            p.rotate(p.radians(characterDirection * 90));
-            p.imageMode(p.CENTER);
-            p.image(characterImg, 0, 0, cellSize * 0.8, cellSize * 0.8);
-            p.pop();
-        };
-        
-        const moveCharacter = () => {
-            if (characterDirection === 0) characterX += cellSize;
-            else if (characterDirection === 1) characterY += cellSize;
-            else if (characterDirection === 2) characterX -= cellSize;
-            else if (characterDirection === 3) characterY -= cellSize;
-            characterX = p.constrain(characterX, cellSize / 2, canvasSize - cellSize / 2);
-            characterY = p.constrain(characterY, cellSize / 2, canvasSize - cellSize / 2);
-        };
-
-        const turnCharacter = (direction) => {
-            characterDirection = (characterDirection + direction + 4) % 4;
-        };
-
-        const checkGoal = () => {
-            if (characterX === goalX && characterY === goalY) {
-                alert("🎉 Congratulations! Goal Reached!");
-                p.noLoop();
-            }
-        };
-        
-        const loadLevel = (levelIndex) => {
-            currentLevel = levels[levelIndex];
-            characterX = currentLevel.startPosition[0];
-            characterY = currentLevel.startPosition[1];
-            characterDirection = currentLevel.initialDirection;
-            goalX = currentLevel.goalPosition[0];
-            goalY = currentLevel.goalPosition[1];
-            document.getElementById('level-name').innerHTML = currentLevel.name;
-            document.getElementById('level-instruction').innerHTML = currentLevel.instruction;
-            workspace.clear();
-            commands = [];
-            if(p.isLooping()) p.noLoop();
-            p.redraw();
-        };
-
-        // --- Expose Control Functions to Global Scope ---
-        window.resetCharacter = () => {
-            commands = [];
-            characterX = currentLevel.startPosition[0];
-            characterY = currentLevel.startPosition[1];
-            characterDirection = currentLevel.initialDirection;
-            if(p.isLooping()) p.noLoop();
-            p.redraw();
-        };
-
-        window.resetAndRunCode = () => {
-            window.resetCharacter();
-            console.log('[DEBUG] Inside resetAndRunCode, Blockly.JavaScript.move_forward is:', Blockly.JavaScript['move_forward']?.toString());
-            const code = Blockly.JavaScript.workspaceToCode(workspace);
-            try {
-                // The generated code now pushes functions to the command queue
-                eval(code);
-                if (commands.length > 0) p.loop();
-            } catch (e) {
-                console.error("Error executing blocks:", e);
-                alert("Error executing blocks! Check the console.");
-            }
-        };
-
-        window.nextLevel = () => {
-            if (currentLevelIndex < levels.length - 1) {
-                loadLevel(++currentLevelIndex);
-            } else {
-                alert("You've completed all the levels!");
-            }
-        };
-
-        window.previousLevel = () => {
-            if (currentLevelIndex > 0) {
-                loadLevel(--currentLevelIndex);
-            } else {
-                alert("You are on the first level.");
-            }
-        };
+      p.draw = () => {
+        p.background(220); 
+        this.drawGrid();
+        this.drawGoal();
+        this.drawCharacter();
+      };
     };
+    
+    // --- Initialize Blockly ---
+    this.workspace = Blockly.inject('blocklyDiv', {
+      toolbox: document.getElementById('toolbox'),
+      scrollbars: true, trashcan: true,
+      zoom: { controls: true, wheel: true, startScale: 1.0 },
+      grid: { spacing: 25, length: 3, colour: '#ccc', snap: true }
+    });
 
-    // --- Start p5.js ---
+    // --- Initialize p5.js ---
     new p5(sketch);
+  },
+
+  // --- Level and Game State Management ---
+  loadLevel: function(levelIndex) {
+    const level = levels[levelIndex];
+    this.currentLevelIndex = levelIndex;
+    this.characterX = level.startPosition[0];
+    this.characterY = level.startPosition[1];
+    this.characterDirection = level.initialDirection;
+    this.goalX = level.goalPosition[0];
+    this.goalY = level.goalPosition[1];
+    document.getElementById('level-name').innerHTML = level.name;
+    document.getElementById('level-instruction').innerHTML = level.instruction;
+    this.workspace.clear();
+    this.resetCharacter();
+  },
+
+  resetCharacter: function() {
+    const level = levels[this.currentLevelIndex];
+    this.characterX = level.startPosition[0];
+    this.characterY = level.startPosition[1];
+    this.characterDirection = level.initialDirection;
+    this.commands = [];
+    if (this.p5 && this.p5.isLooping()) this.p5.noLoop();
+    if (this.p5) this.p5.redraw();
+  },
+
+  // --- Drawing Methods (called from p5's draw) ---
+  drawGrid: function() {
+    this.p5.stroke(200);
+    for (let x = 0; x <= this.canvasSize; x += this.cellSize) this.p5.line(x, 0, x, this.canvasSize);
+    for (let y = 0; y <= this.canvasSize; y += this.cellSize) this.p5.line(0, y, this.canvasSize, y);
+  },
+  drawGoal: function() {
+    this.p5.fill(255, 165, 0);
+    this.p5.rect(this.goalX - this.cellSize / 2, this.goalY - this.cellSize / 2, this.cellSize, this.cellSize);
+  },
+  drawCharacter: function() {
+    this.p5.push();
+    this.p5.translate(this.characterX, this.characterY);
+    this.p5.rotate(this.p5.radians(this.characterDirection * 90));
+    this.p5.imageMode(this.p5.CENTER);
+    this.p5.image(this.characterImg, 0, 0, this.cellSize * 0.8, this.cellSize * 0.8);
+    this.p5.pop();
+  },
+  
+  // --- Execution Logic ---
+  run: function() {
+    this.resetCharacter();
+    const code = Blockly.JavaScript.workspaceToCode(this.workspace);
+    
+    // This is a safer way to execute the generated code
+    try {
+      // Create a new async function to handle delays and step-by-step execution
+      const execute = async () => {
+        // Simple eval is problematic for loops and timing.
+        // A better approach is a command queue.
+        this.commands = []; // Clear previous commands
+        eval(code); // This populates App.commands
+
+        for (const command of this.commands) {
+            if (command === "move") {
+                if (this.isPathClear()) {
+                    if (this.characterDirection === 0) this.characterX += this.cellSize;
+                    else if (this.characterDirection === 1) this.characterY += this.cellSize;
+                    else if (this.characterDirection === 2) this.characterX -= this.cellSize;
+                    else if (this.characterDirection === 3) this.characterY -= this.cellSize;
+                }
+            } else if (command === "turn_left") {
+                this.characterDirection = (this.characterDirection - 1 + 4) % 4;
+            } else if (command === "turn_right") {
+                this.characterDirection = (this.characterDirection + 1) % 4;
+            }
+            this.p5.redraw();
+            await new Promise(resolve => setTimeout(resolve, 150)); // Wait 150ms between steps
+
+            if (this.isAtGoal()) {
+                alert("🎉 Congratulations! Goal Reached!");
+                return;
+            }
+        }
+      };
+      execute();
+      
+    } catch (e) {
+      console.error("Error executing blocks:", e);
+      alert("Error executing blocks! Check the console.");
+    }
+  }
+};
+
+// --- 3. INITIALIZE THE APP (AFTER PAGE HAS LOADED) ---
+document.addEventListener('DOMContentLoaded', () => {
+  App.init();
 });
+
+// --- Expose controls to the global scope for HTML buttons ---
+function resetAndRunCode() { App.run(); }
+function resetCharacter() { App.resetCharacter(); }
+function nextLevel() { App.loadLevel(App.currentLevelIndex + 1); }
+function previousLevel() { App.loadLevel(App.currentLevelIndex - 1); }
