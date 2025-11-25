@@ -321,6 +321,9 @@ function previousLevel() {
 function resetAndRunCode() {
     resetCharacter(); 
     
+    console.log("--- DEBUG: Checking Blockly.JavaScript object ---");
+    console.log(Blockly.JavaScript);
+    
     const code = Blockly.JavaScript.workspaceToCode(workspace);
     
     try {
