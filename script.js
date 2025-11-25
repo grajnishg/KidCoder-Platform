@@ -1,27 +1,3 @@
-// --- Global Game Variables ---
-let characterX; 
-let characterY; 
-let characterDirection = 0; // 0=Right, 1=Down, 2=Left, 3=Up
-let cellSize = 50; 
-let commands = []; // Queue for commands
-let mazeSize = 8; // 8x8 grid (50px * 8 = 400px canvas)
-let goalX = (mazeSize - 1) * cellSize + (cellSize / 2); // Goal at bottom-right corner
-let goalY = (mazeSize - 1) * cellSize + (cellSize / 2); 
-const canvasSize = 400; 
-let proceduresMap = {}; // Stores user-defined function bodies
-
-// 🔥 NEW: Level Management Variables
-let currentLevelIndex = 0;
-let currentLevel;
-// --- Blockly Initialization ---
-const workspace = Blockly.inject('blocklyDiv', {
-    toolbox: document.getElementById('toolbox'),
-    scrollbars: true,
-    trashcan: true,
-    zoom: { controls: true, wheel: true, startScale: 1.0 },
-    grid: { spacing: 25, length: 3, colour: '#ccc', snap: true }
-});
-
 // --- Custom Block Definitions ---
 
 Blockly.Blocks['move_forward'] = {
@@ -78,7 +54,6 @@ Blockly.Blocks['repeat_until'] = {
   }
 };
 
-
 // --- Blockly Code Generators ---
 
 Blockly.JavaScript['move_forward'] = function(block) {
@@ -101,8 +76,8 @@ Blockly.JavaScript['controls_repeat_ext'] = function(block) {
   let code = '';
   const loopVar = Blockly.JavaScript.nameDB_.getReserveName(
       'count', Blockly.Names.NameType.VARIABLE);
-  code += 'for (var ' + loopVar + ' = 0; ' +
-      loopVar + ' < ' + repetitions + '; ' +
+  code += 'for (var ' + loopVar + ' = 0; ' + 
+      loopVar + ' < ' + repetitions + '; ' + 
       loopVar + '++) {\n' + branch + '}\n';
   return code;
 };
@@ -139,10 +114,49 @@ Blockly.JavaScript['repeat_until'] = function(block) {
       type: 'while',
       code: branch 
   };
-  return `commands.push(${JSON.stringify(loopCommand)});\n`;
+  return `commands.push(${JSON.stringify(loopCommand)});
+`;
 };
 
+// --- Global Game Variables ---
+let characterX; 
+let characterY; 
+let characterDirection = 0; // 0=Right, 1=Down, 2=Left, 3=Up
+let cellSize = 50; 
+let commands = []; // Queue for commands
+let mazeSize = 8; // 8x8 grid (50px * 8 = 400px canvas)
+let goalX = (mazeSize - 1) * cellSize + (cellSize / 2); // Goal at bottom-right corner
+let goalY = (mazeSize - 1) * cellSize + (cellSize / 2); 
+const canvasSize = 400; 
+let proceduresMap = {}; // Stores user-defined function bodies
+let characterImg; 
+
+// --- Level Management Variables ---
+let currentLevelIndex = 0;
+let currentLevel;
+
+// --- Blockly Initialization ---
+const workspace = Blockly.inject('blocklyDiv', {
+    toolbox: document.getElementById('toolbox'),
+    scrollbars: true,
+    trashcan: true,
+    zoom: { controls: true, wheel: true, startScale: 1.0 },
+    grid: { spacing: 25, length: 3, colour: '#ccc', snap: true }
+});
+
 // --- P5.js Game Engine Functions ---
+
+function preload() {
+    characterImg = loadImage('assets/character.png');
+}
+
+function setup() {
+  const canvas = createCanvas(canvasSize, canvasSize);
+  canvas.parent('game-container');
+  loadLevel(currentLevelIndex); // Load the first level.
+  noLoop(); // Stop the draw loop.
+  redraw(); // Draw a single frame to show the initial state.
+}
 
 function loadLevel(levelIndex) {
     if (levelIndex < 0 || levelIndex >= levels.length) {
@@ -161,22 +175,9 @@ function loadLevel(levelIndex) {
     document.getElementById('level-instruction').innerHTML = currentLevel.instruction;
 
     // More setup based on the level
-    // For example, you might want to clear the workspace:
     workspace.clear();
 
-    // Or set up specific blocks required for the level
-    // (This part is more advanced and can be added later)
-
     resetCharacter(); // Reset character to the new level's start
-}
-
-
-function setup() {
-  const canvas = createCanvas(canvasSize, canvasSize);
-  canvas.parent('game-container');
-  loadLevel(currentLevelIndex); // Load the first level.
-  noLoop(); // Stop the draw loop.
-  redraw(); // Draw a single frame to show the initial state.
 }
 
 function draw() {
@@ -235,12 +236,6 @@ function drawGoal() {
     textSize(16);
     textAlign(CENTER, CENTER);
     text("GOAL", goalX, goalY);
-}
-
-let characterImg; 
-
-function preload() {
-    characterImg = loadImage('assets/character.png');
 }
 
 function drawCharacter() {
