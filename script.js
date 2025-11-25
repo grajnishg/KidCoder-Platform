@@ -46,7 +46,7 @@ Blockly.JavaScript['controls_repeat_ext'] = function(block) {
   const repetitions = Blockly.JavaScript.valueToCode(block, 'TIMES', Blockly.JavaScript.ORDER_ASSIGNMENT) || '0';
   let branch = Blockly.JavaScript.statementToCode(block, 'DO');
   branch = Blockly.JavaScript.addLoopTrap(branch, block);
-  const loopVar = Blockly.JavaScript.nameDB_.getReserveName('count', Blockly.Names.NameType.VARIABLE);
+  const loopVar = Blockly.JavaScript.variableDB_.getDistinctName('count', Blockly.Variables.NAME_TYPE);
   return `for (let ${loopVar} = 0; ${loopVar} < ${repetitions}; ${loopVar}++) {\n${branch}}\n`;
 };
 Blockly.JavaScript['if_front_is_clear'] = function(block) {
@@ -221,5 +221,13 @@ document.addEventListener('DOMContentLoaded', () => {
 // --- Expose controls to the global scope for HTML buttons ---
 function resetAndRunCode() { App.run(); }
 function resetCharacter() { App.resetCharacter(); }
-function nextLevel() { App.loadLevel(App.currentLevelIndex + 1); }
-function previousLevel() { App.loadLevel(App.currentLevelIndex - 1); }
+function nextLevel() {
+  if (App.currentLevelIndex < levels.length - 1) {
+    App.loadLevel(App.currentLevelIndex + 1);
+  }
+}
+function previousLevel() {
+  if (App.currentLevelIndex > 0) {
+    App.loadLevel(App.currentLevelIndex - 1);
+  }
+}
