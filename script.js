@@ -29,7 +29,7 @@ Blockly.Blocks['if_front_is_clear'] = {
     this.setColour(120); this.setTooltip("Checks if the character can move forward.");
   }
 };
-Blockly.Block s['repeat_until'] = {
+Blockly.Blocks['repeat_until'] = {
   init: function() {
     this.appendStatementInput("DO").setCheck(null).appendField("Repeat until goal is reached");
     this.setPreviousStatement(true, null); this.setNextStatement(true, null);
