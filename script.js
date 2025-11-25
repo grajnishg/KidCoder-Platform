@@ -57,6 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Blockly Code Generators ---
     Blockly.JavaScript['move_forward'] = block => 'commands.push("move");\n';
+    console.log('[DEBUG] Immediately after definition, Blockly.JavaScript.move_forward is:', Blockly.JavaScript['move_forward']?.toString());
     Blockly.JavaScript['turn_left'] = block => 'commands.push("turn_left");\n';
     Blockly.JavaScript['turn_right'] = block => 'commands.push("turn_right");\n';
 
@@ -218,6 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         window.resetAndRunCode = () => {
             window.resetCharacter();
+            console.log('[DEBUG] Inside resetAndRunCode, Blockly.JavaScript.move_forward is:', Blockly.JavaScript['move_forward']?.toString());
             const code = Blockly.JavaScript.workspaceToCode(workspace);
             try {
                 // The generated code now pushes functions to the command queue
