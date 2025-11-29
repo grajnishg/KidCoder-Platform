@@ -239,6 +239,8 @@ function resetCharacter() { App.resetCharacter(); }
 function nextLevel() {
   if (App.currentLevelIndex < levels.length - 1) {
     App.loadLevel(App.currentLevelIndex + 1);
+  } else {
+    alert("You've completed all the levels!");
   }
 }
 function previousLevel() {
