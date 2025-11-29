@@ -42,11 +42,11 @@ Blockly.JavaScript['move_forward'] = block => 'App.commands.push("move");\n';
 Blockly.JavaScript['turn_left'] = block => 'App.commands.push("turn_left");\n';
 Blockly.JavaScript['turn_right'] = block => 'App.commands.push("turn_right");\n';
 
-Blockly.JavaScript['controls_repeat_ext'] = function(block) {
-  const repetitions = Blockly.JavaScript.valueToCode(block, 'TIMES', Blockly.JavaScript.ORDER_ASSIGNMENT) || '0';
-  let branch = Blockly.JavaScript.statementToCode(block, 'DO');
-  branch = Blockly.JavaScript.addLoopTrap(branch, block);
-  const loopVar = Blockly.JavaScript.nameDB_.getReserveName('count', Blockly.Names.NameType.VARIABLE);
+Blockly.JavaScript['controls_repeat_ext'] = function(block, generator) {
+  const repetitions = generator.valueToCode(block, 'TIMES', Blockly.JavaScript.ORDER_ATOMIC) || '0';
+  let branch = generator.statementToCode(block, 'DO');
+  branch = generator.addLoopTrap(branch, block.id);
+  const loopVar = generator.nameDB_.getReserveName('count', Blockly.Names.NameType.VARIABLE);
   return `for (let ${loopVar} = 0; ${loopVar} < ${repetitions}; ${loopVar}++) {\n${branch}}\n`;
 };
 Blockly.JavaScript['if_front_is_clear'] = function(block) {
