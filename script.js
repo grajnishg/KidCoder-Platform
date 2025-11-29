@@ -43,10 +43,10 @@ Blockly.JavaScript['turn_left'] = block => 'App.commands.push("turn_left");\n';
 Blockly.JavaScript['turn_right'] = block => 'App.commands.push("turn_right");\n';
 
 Blockly.JavaScript['controls_repeat_ext'] = function(block) {
-  const repetitions = Blockly.JavaScript.valueToCode(block, 'TIMES', Blockly.JavaScript.ORDER_ATOMIC) || '0';
-  let branch = Blockly.JavaScript.statementToCode(block, 'DO');
-  branch = Blockly.JavaScript.addLoopTrap(branch, block.id);
-  const loopVar = Blockly.JavaScript.variableDB_.getDistinctName('count', Blockly.Variables.NAME_TYPE);
+  const repetitions = this.valueToCode(block, 'TIMES', this.ORDER_ATOMIC) || '0';
+  let branch = this.statementToCode(block, 'DO');
+  branch = this.addLoopTrap(branch, block.id);
+  const loopVar = this.variableDB_.getDistinctName('count', Blockly.Variables.NAME_TYPE);
   return `for (let ${loopVar} = 0; ${loopVar} < ${repetitions}; ${loopVar}++) {\n${branch}}\n`;
 };
 Blockly.JavaScript['if_front_is_clear'] = function(block) {
