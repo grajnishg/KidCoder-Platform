@@ -60,7 +60,7 @@ Blockly.JavaScript['custom_repeat'] = function(block) {
   const repetitions = Blockly.JavaScript.valueToCode(block, 'TIMES', Blockly.JavaScript.ORDER_ATOMIC) || '0';
   let branch = Blockly.JavaScript.statementToCode(block, 'DO');
   branch = Blockly.JavaScript.addLoopTrap(branch, block.id);
-  const loopVar = Blockly.JavaScript.variableDB_.getDistinctName('count', Blockly.Variables.NAME_TYPE);
+  const loopVar = Blockly.JavaScript.nameDB_.getReservedName('count', Blockly.Names.NameType.VARIABLE);
   return `for (let ${loopVar} = 0; ${loopVar} < ${repetitions}; ${loopVar}++) {\n${branch}}\n`;
 };
 
