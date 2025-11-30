@@ -16,6 +16,29 @@ const levels = [
         initialDirection: 1, // Start facing Down
         requiredBlocks: ["move_forward", "controls_repeat_ext"], // Focus on loops
         instruction: "Use the REPEAT block to move down and then right to the goal. You need to turn twice."
+    },
+    {
+        name: "Level 3: S-Turn Challenge",
+        startPosition: [50 / 2, 50 / 2],
+        goalPosition: [250 + (50 / 2), 150 + (50 / 2)], // Cell 5,3
+        initialDirection: 0,
+        requiredBlocks: ["move_forward", "turn_left", "turn_right"],
+        instruction: "Navigate an S-turn! Use turns and moves to reach the goal."
+    },
+    {
+        name: "Level 4: The Square Dance",
+        startPosition: [50 / 2, 50 / 2],
+        goalPosition: [50 / 2, 50 / 2], // Back to start after a loop
+        initialDirection: 0,
+        requiredBlocks: ["move_forward", "turn_right", "custom_repeat"],
+        instruction: "Make a square! Use a REPEAT block to move forward 3 times and turn right, four times."
+    },
+    {
+        name: "Level 5: Around the Block",
+        startPosition: [50 / 2, 50 / 2], // Cell 0,0
+        goalPosition: [50 + (50 / 2), 150 + (50 / 2)], // Cell 1,3
+        initialDirection: 0,
+        requiredBlocks: ["move_forward", "turn_left", "turn_right", "custom_repeat"],
+        instruction: "Go around the block! You'll need to move, turn, and repeat to reach the goal."
     }
-    // You can add dozens more levels here!
 ];
