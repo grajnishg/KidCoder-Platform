@@ -36,9 +36,9 @@ const levels = [
     {
         name: "Level 5: Around the Block",
         startPosition: [50 / 2, 50 / 2], // Cell 0,0
-        goalPosition: [50 + (50 / 2), 150 + (50 / 2)], // Cell 1,3
+        goalPosition: [300 + (50 / 2), 100 + (50 / 2)], // Cell 6,2
         initialDirection: 0,
         requiredBlocks: ["move_forward", "turn_left", "turn_right", "custom_repeat"],
-        instruction: "Go around the block! You'll need to move, turn, and repeat to reach the goal."
+        instruction: "Navigate around the obstacle. Try moving forward 3 steps, turning left, moving 2 steps, and then turning left again to reach the goal!"
     }
 ];
